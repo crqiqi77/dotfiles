@@ -1,0 +1,91 @@
+#!/bin/sh
+
+# CPU 初始值
+read cpu user nice system idle iowait irq softirq steal rest < /proc/stat
+prev_idle=$((idle + iowait))
+prev_total=$((user + nice + system + idle + iowait + irq + softirq + steal))
+
+# 网络
+get_rx() {
+    awk 'NR>2 && $1 !~ /lo:/ {rx += $2} END {print rx+0}' /proc/net/dev
+}
+
+get_tx() {
+    awk 'NR>2 && $1 !~ /lo:/ {tx += $10} END {print tx+0}' /proc/net/dev
+}
+
+prev_rx=$(get_rx)
+prev_tx=$(get_tx)
+
+while true; do
+    sleep 1
+
+    # CPU 使用率
+    read cpu user nice system idle iowait irq softirq steal rest < /proc/stat
+
+    idle_now=$((idle + iowait))
+    total_now=$((user + nice + system + idle + iowait + irq + softirq + steal))
+
+    diff_idle=$((idle_now - prev_idle))
+    diff_total=$((total_now - prev_total))
+
+    if [ "$diff_total" -gt 0 ]; then
+        cpu_usage=$((100 * (diff_total - diff_idle) / diff_total))
+    else
+        cpu_usage=0
+    fi
+
+    prev_idle=$idle_now
+    prev_total=$total_now
+
+    # CPU 温度
+    temp=$(cat /sys/class/hwmon/hwmon1/temp1_input 2>/dev/null)
+
+if [ -n "$temp" ]; then
+    temp=$(awk "BEGIN {printf \"%.1f\", $temp/1000}")
+else
+    temp="?"
+fi
+
+    # 内存
+    mem=$(free | awk '/Mem:/ {printf "%.0f", $3/$2*100}')
+
+    # 网络实时速度
+    rx=$(get_rx)
+    tx=$(get_tx)
+
+    rx_speed=$((rx - prev_rx))
+    tx_speed=$((tx - prev_tx))
+
+    prev_rx=$rx
+    prev_tx=$tx
+
+    rx_h=$(awk -v b="$rx_speed" 'BEGIN {
+        if (b >= 1048576)
+            printf "%.1fMB/s", b/1048576;
+        else
+            printf "%.0fKB/s", b/1024
+    }')
+
+    tx_h=$(awk -v b="$tx_speed" 'BEGIN {
+        if (b >= 1048576)
+            printf "%.1fMB/s", b/1048576;
+        else
+            printf "%.0fKB/s", b/1024
+    }')
+
+    # 音量
+    volume=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null)
+
+    if echo "$volume" | grep -q MUTED; then
+        volume="MUTE"
+        volume_icon="󰝟"
+    else
+        volume=$(echo "$volume" | awk '{printf "%.0f", $2*100}')
+        volume_icon=""
+    fi
+
+    # 输出
+    echo " ${cpu_usage}% |  ${temp}°C |  ${mem}% |  ${rx_h}  ${tx_h} | ${volume_icon} ${volume}% |  $(date '+%Y-%m-%d %H:%M')"
+done
+
