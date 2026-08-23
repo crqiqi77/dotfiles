@@ -15,15 +15,14 @@ set $term foot
 set $menu fuzzel
 
 ### Output configuration
-output * bg /home/cr/wallpaper/202608220340.png fill
 output DP-1 scale 1.5 mode 3840x2160@160.006Hz
 
 ### Idle configuration
 exec fcitx5 -d
 exec swayidle -w \
-timeout 300 'swaylock -f -c 000000' \
+timeout 300 'swaylock -f -i /home/cr/wallpaper/202608220340.png' \
 timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
-before-sleep 'swaylock -f -c 000000'
+timeout 1000 'sudo -n /usr/local/sbin/suspend'
 exec pipewire
 exec pipewire-pulse
 exec wireplumber
@@ -31,6 +30,7 @@ exec wireplumber
 exec gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
 exec gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 
+exec_always sh -c 'swaybg -i "$(find /home/cr/wallpaper -type f -name "*.png" | shuf -n 1)" -m fill'
 
 ### Input configuration
 #
@@ -212,17 +212,28 @@ bindsym $mod+r mode "resize"
 
 #
 # Status Bar:
-#
 # Read `man 5 sway-bar` for more information about this section.
 bar {
     position top
     colors {
-        statusline #ffffff
-        background #323232
-        inactive_workspace #32323200 #32323200 #5c5c5c
+        background #00000000
+        statusline #ffffffff
+        separator  #ffffff40
+
+        focused_workspace  #00000000 #00000000 #ffffffff
+        active_workspace   #00000000 #00000000 #ffffffff
+        inactive_workspace #00000000 #00000000 #aaaaaaff
+        urgent_workspace   #00000000 #ff0000ff #ffffffff
     }
 	status_command ~/.config/sway/status.sh
 	tray_last no
 }
+
+default_border normal 2
+default_floating_border normal 2
+client.focused          #89b4faff #1e1e2ecc #ffffffff #f9e2afff #89b4faff
+client.focused_inactive #45475aff #18182599 #bac2deff #45475aff #45475aff
+client.unfocused        #313244aa #11111b80 #7f849cff #313244aa #313244aa
+client.urgent           #f38ba8ff #f38ba8cc #ffffffff #f9e2afff #f38ba8ff
 
 include /etc/sway/config.d/*
