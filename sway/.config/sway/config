@@ -10,7 +10,7 @@ set $down j
 set $up k
 set $right l
 # Your preferred terminal emulator
-set $term foot
+set $term footclient
 # Your preferred application launcher
 set $menu fuzzel
 
@@ -20,15 +20,17 @@ output DP-1 scale 1.5 mode 3840x2160@160.006Hz
 ### Idle configuration
 exec fcitx5 -d
 exec swayidle -w \
-timeout 300 'swaylock -f -i /home/cr/wallpaper/202608220340.png' \
-timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
-timeout 1000 'sudo -n /usr/local/sbin/suspend'
+timeout 400 'swaylock -f -i /home/cr/wallpaper/202608240015.png' \
+timeout 800 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+timeout 1500 'sudo -n /usr/local/sbin/suspend'
 exec pipewire
 exec pipewire-pulse
 exec wireplumber
 # Dark mode
 exec gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
 exec gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+exec mako
+exec foot --server
 
 exec_always sh -c 'swaybg -i "$(find /home/cr/wallpaper -type f -name "*.png" | shuf -n 1)" -m fill'
 
@@ -209,6 +211,11 @@ bindsym $mod+r mode "resize"
 
     # Special key to take a screenshot with grim
     bindsym F12 exec grim -g "$(slurp)"
+#custom
+bindsym $mod+c exec ~/.config/sway/caffeine.sh
+# 打开 Crow Translate
+bindsym $mod+t exec qdbus6 org.kde.CrowTranslate /org/kde/CrowTranslate/MainWindow translateSelection
+
 
 #
 # Status Bar:

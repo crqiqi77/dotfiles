@@ -14,6 +14,7 @@ vim.pack.add({
 	{ src = "https://github.com/neovim/nvim-lspconfig" },
 	{ src = 'https://github.com/nvim-lua/plenary.nvim' },
 	{ src = "https://github.com/nvim-telescope/telescope.nvim" },
+	{ src = "https://github.com/DamianVCechov/hexview.nvim" },
 }, {
 	load = true,
 })
@@ -29,6 +30,8 @@ require('lualine').setup({
 		lualine_c = { { "filename", path = 3, symbols = { modified = "[+]", readonly = "[-]", unnamed = "[No Name]", } } }
 	}
 })
+
+require("hexview").setup()
 
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Telescope find files' })

@@ -28,7 +28,6 @@ if test -z "${XDG_RUNTIME_DIR}"; then
     fi
 fi
 
-export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 export QT_IM_MODULES="wayland;fcitx"
 export XMODIFIERS=@im=fcitx
@@ -36,5 +35,7 @@ export http_proxy="http://127.0.0.1:7897"
 export https_proxy="http://127.0.0.1:7897"
 export HTTP_PROXY="$http_proxy"
 export HTTPS_PROXY="$https_proxy"
+
+export LFS=/mnt/lfs
 
 [[ ${BLE_VERSION-} ]] && ble-attach
